@@ -22,9 +22,11 @@ import com.facebook.presto.common.block.BlockEncodingSerde;
 import com.facebook.presto.common.function.OperatorType;
 import com.facebook.presto.common.function.SqlFunctionResult;
 import com.facebook.presto.common.transaction.TransactionId;
+import com.facebook.presto.common.type.BigintEnumType;
 import com.facebook.presto.common.type.DistinctType;
 import com.facebook.presto.common.type.DistinctTypeInfo;
 import com.facebook.presto.common.type.ParametricType;
+import com.facebook.presto.common.type.StandardTypes;
 import com.facebook.presto.common.type.Type;
 import com.facebook.presto.common.type.TypeManager;
 import com.facebook.presto.common.type.TypeSignature;
@@ -68,6 +70,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.weakref.jmx.Managed;
@@ -757,6 +760,16 @@ public class FunctionAndTypeManager
 
     private Type getUserDefinedType(TypeSignature signature)
     {
+        if ("fb.std.orderkey".equals(signature.toString())) {
+            UserDefinedType userDefinedType = new UserDefinedType(
+                    QualifiedObjectName.valueOf("fb.std.orderkey"),
+                    new TypeSignature(
+                            StandardTypes.BIGINT_ENUM,
+                            TypeSignatureParameter.of(new BigintEnumType.LongEnumMap(
+                                    "fb.std.orderkey",
+                                    ImmutableMap.of("k1", 1L, "k2", 2L)))));
+            return getType(userDefinedType);
+        }
         Optional<FunctionNamespaceManager<?>> functionNamespaceManager = getServingFunctionNamespaceManager(signature.getTypeSignatureBase());
         checkArgument(functionNamespaceManager.isPresent(), "Cannot find function namespace for type '%s'", signature.getBase());
         UserDefinedType userDefinedType = functionNamespaceManager.get()

@@ -85,7 +85,8 @@ final class NativeExecutionTypeRewrite
     {
         if (SystemSessionProperties.isNativeExecutionEnabled(session)
                 && SystemSessionProperties.isNativeExecutionTypeRewriteEnabled(session)) {
-            return (Statement) new Rewriter(metadata.getFunctionAndTypeManager().getFunctionAndTypeResolver()).process(node, null);
+            Statement rewrittenStatement = (Statement) new Rewriter(metadata.getFunctionAndTypeManager().getFunctionAndTypeResolver()).process(node, null);
+            return rewrittenStatement;
         }
         return node;
     }

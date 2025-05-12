@@ -79,6 +79,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.facebook.presto.SystemSessionProperties.JOIN_REORDERING_STRATEGY;
+import static com.facebook.presto.SystemSessionProperties.NATIVE_EXECUTION_ENABLED;
 import static com.facebook.presto.SystemSessionProperties.OPTIMIZE_METADATA_QUERIES;
 import static com.facebook.presto.SystemSessionProperties.OPTIMIZE_METADATA_QUERIES_CALL_THRESHOLD;
 import static com.facebook.presto.SystemSessionProperties.OPTIMIZE_METADATA_QUERIES_IGNORE_STATS;
@@ -164,6 +165,16 @@ public class TestHiveLogicalPlanner
                 ImmutableMap.of("experimental.pushdown-subfields-enabled", "true",
                         "pushdown-subfields-from-lambda-enabled", "true"),
                 Optional.empty());
+    }
+
+    @Test
+    public void testCapella() {
+        QueryRunner queryRunner = getQueryRunner();
+        Session session = Session.builder(getSession())
+                .setSystemProperty(NATIVE_EXECUTION_ENABLED, "true")
+                .setSystemProperty("native_execution_type_rewrite_enabled", "true")
+                .build();
+        queryRunner.execute(session, "SELECT TRY_CAST(orderkey AS fb.std.orderkey) FROM orders");
     }
 
     @Test
